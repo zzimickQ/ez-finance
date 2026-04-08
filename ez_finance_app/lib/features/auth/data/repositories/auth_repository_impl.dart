@@ -1,4 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_datasource.dart';
@@ -78,8 +79,6 @@ class AuthRepositoryImpl implements AuthRepository {
     return User(
       id: model.id,
       email: model.email,
-      name: model.name,
-      avatarUrl: model.avatarUrl,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
     );

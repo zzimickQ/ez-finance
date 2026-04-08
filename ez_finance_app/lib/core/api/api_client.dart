@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'api_endpoints.dart';
+
 import '../error/exceptions.dart';
+import 'api_endpoints.dart';
 
 class ApiClient {
   final Dio _dio;
@@ -204,7 +205,7 @@ class _LoggingInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     print(
-      'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',
+      'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path} => DATA: ${response.data}',
     );
     handler.next(response);
   }
@@ -212,7 +213,7 @@ class _LoggingInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     print(
-      'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}',
+      'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path} => MESSAGE: ${err.response?.data}',
     );
     handler.next(err);
   }

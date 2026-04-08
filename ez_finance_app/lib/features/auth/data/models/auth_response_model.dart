@@ -15,9 +15,9 @@ class AuthResponseModel extends Equatable {
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
     return AuthResponseModel(
-      accessToken: json['access_token'] as String?,
-      refreshToken: json['refresh_token'] as String?,
-      sessionToken: json['session_token'] as String?,
+      accessToken: json['accessToken'] as String?,
+      refreshToken: json['refreshToken'] as String?,
+      sessionToken: json['sessionToken'] as String?,
       user: json['user'] != null
           ? UserModel.fromJson(json['user'] as Map<String, dynamic>)
           : null,
@@ -26,9 +26,9 @@ class AuthResponseModel extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'access_token': accessToken,
-      'refresh_token': refreshToken,
-      'session_token': sessionToken,
+      'accessToken': accessToken,
+      'refreshToken': refreshToken,
+      'sessionToken': sessionToken,
       'user': user?.toJson(),
     };
   }
@@ -38,30 +38,24 @@ class AuthResponseModel extends Equatable {
 }
 
 class UserModel extends Equatable {
-  final int id;
+  final String id;
   final String email;
-  final String? name;
-  final String? avatarUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   const UserModel({
     required this.id,
     required this.email,
-    this.name,
-    this.avatarUrl,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] as int,
+      id: json['id'] as String,
       email: json['email'] as String,
-      name: json['name'] as String?,
-      avatarUrl: json['avatar_url'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
 
@@ -69,13 +63,11 @@ class UserModel extends Equatable {
     return {
       'id': id,
       'email': email,
-      'name': name,
-      'avatar_url': avatarUrl,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
   @override
-  List<Object?> get props => [id, email, name, avatarUrl, createdAt, updatedAt];
+  List<Object?> get props => [id, email, createdAt, updatedAt];
 }

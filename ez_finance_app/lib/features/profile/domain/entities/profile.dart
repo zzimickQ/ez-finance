@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class Profile extends Equatable {
   final int id;
-  final int userId;
+  final String userId;
   final String? firstName;
   final String? lastName;
   final String? phone;
@@ -31,7 +31,7 @@ class Profile extends Equatable {
 
   Profile copyWith({
     int? id,
-    int? userId,
+    String? userId,
     String? firstName,
     String? lastName,
     String? phone,

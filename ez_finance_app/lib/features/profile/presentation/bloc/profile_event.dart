@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 import '../../domain/entities/profile.dart';
 
 abstract class ProfileEvent extends Equatable {
@@ -9,7 +10,7 @@ abstract class ProfileEvent extends Equatable {
 }
 
 class LoadProfileEvent extends ProfileEvent {
-  final int userId;
+  final String userId;
 
   const LoadProfileEvent({required this.userId});
 

@@ -1,10 +1,11 @@
 import 'package:drift/drift.dart';
+
 import '../../../../core/database/app_database.dart';
 import '../../domain/entities/profile.dart' as entity;
 
 abstract class ProfileLocalDataSource {
-  Future<entity.Profile?> getProfile(int userId);
-  Stream<entity.Profile?> watchProfile(int userId);
+  Future<entity.Profile?> getProfile(String userId);
+  Stream<entity.Profile?> watchProfile(String userId);
   Future<entity.Profile> createProfile(entity.Profile profile);
   Future<entity.Profile> updateProfile(entity.Profile profile);
 }
@@ -15,14 +16,14 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
   ProfileLocalDataSourceImpl({required this.db});
 
   @override
-  Future<entity.Profile?> getProfile(int userId) async {
+  Future<entity.Profile?> getProfile(String userId) async {
     final profile = await db.getProfileByUserId(userId);
     if (profile == null) return null;
     return _mapToEntity(profile);
   }
 
   @override
-  Stream<entity.Profile?> watchProfile(int userId) {
+  Stream<entity.Profile?> watchProfile(String userId) {
     return db.watchProfileByUserId(userId).map((profile) {
       if (profile == null) return null;
       return _mapToEntity(profile);

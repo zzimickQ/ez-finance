@@ -1,8 +1,10 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'tables/users_table.dart';
+import 'package:uuid/uuid.dart';
+
 import 'tables/profiles_table.dart';
 import 'tables/sync_queue_table.dart';
+import 'tables/users_table.dart';
 
 part 'app_database.g.dart';
 
@@ -21,7 +23,7 @@ class AppDatabase extends _$AppDatabase {
 
   Stream<List<User>> watchAllUsers() => select(users).watch();
 
-  Future<User?> getUserById(int id) =>
+  Future<User?> getUserById(String id) =>
       (select(users)..where((u) => u.id.equals(id))).getSingleOrNull();
 
   Future<User?> getUserByEmail(String email) =>
@@ -31,7 +33,7 @@ class AppDatabase extends _$AppDatabase {
 
   Future<bool> updateUser(User user) => update(users).replace(user);
 
-  Future<int> deleteUser(int id) =>
+  Future<int> deleteUser(String id) =>
       (delete(users)..where((u) => u.id.equals(id))).go();
 
   Future<List<Profile>> getAllProfiles() => select(profiles).get();
@@ -40,11 +42,11 @@ class AppDatabase extends _$AppDatabase {
     return (select(profiles)..where((p) => p.isDeleted.equals(false))).watch();
   }
 
-  Future<Profile?> getProfileByUserId(int userId) => (select(
+  Future<Profile?> getProfileByUserId(String userId) => (select(
     profiles,
   )..where((p) => p.userId.equals(userId))).getSingleOrNull();
 
-  Stream<Profile?> watchProfileByUserId(int userId) =>
+  Stream<Profile?> watchProfileByUserId(String userId) =>
       (select(profiles)
             ..where((p) => p.userId.equals(userId) & p.isDeleted.equals(false)))
           .watchSingleOrNull();

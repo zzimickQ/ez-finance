@@ -1,5 +1,5 @@
-import express, { Request, Response } from "express";
 import cors from "cors";
+import express, { Request, Response } from "express";
 import { connectDB } from "./db";
 import apiRouter from "./routes";
 
@@ -8,6 +8,17 @@ export async function main() {
     await connectDB();
 
     const app = express().use(cors());
+
+    app.use(express.json());
+
+    app.use((req: Request, res: Response, next) => {
+      res.on("finish", () => {
+        console.log(
+          `[${new Date().toLocaleString()}] ${req.method} ${res.statusCode} ${req.originalUrl}`
+        );
+      });
+      next();
+    });
 
     app.get("/health", (req: Request, res: Response) => {
       res.json({

@@ -1,10 +1,9 @@
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 class Users extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  TextColumn get id => text().clientDefault(() => const Uuid().v4())();
   TextColumn get email => text()();
-  TextColumn get name => text().nullable()();
-  TextColumn get avatarUrl => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   IntColumn get version => integer().withDefault(const Constant(1))();

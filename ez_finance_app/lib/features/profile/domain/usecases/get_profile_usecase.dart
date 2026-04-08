@@ -6,11 +6,15 @@ class GetProfileUseCase {
 
   GetProfileUseCase(this.repository);
 
-  Future<Profile?> call(int userId) {
-    return repository.getProfile(userId);
+  Future<Profile?> call(String userId) async {
+    final profile = await repository.getProfile(userId);
+    if (profile == null) {
+      await repository.syncAll();
+    }
+    return profile;
   }
 
-  Stream<Profile?> watch(int userId) {
+  Stream<Profile?> watch(String userId) {
     return repository.watchProfile(userId);
   }
 }

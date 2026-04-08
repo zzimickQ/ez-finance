@@ -1,9 +1,10 @@
 import 'package:drift/drift.dart';
+
 import 'users_table.dart';
 
 class Profiles extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get userId => integer().references(Users, #id)();
+  TextColumn get userId => text().unique().references(Users, #id)();
   TextColumn get firstName => text().nullable()();
   TextColumn get lastName => text().nullable()();
   TextColumn get phone => text().nullable()();

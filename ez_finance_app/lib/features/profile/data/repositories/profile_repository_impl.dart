@@ -20,12 +20,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
   });
 
   @override
-  Future<Profile?> getProfile(int userId) async {
+  Future<Profile?> getProfile(String userId) async {
     return await localDataSource.getProfile(userId);
   }
 
   @override
-  Stream<Profile?> watchProfile(int userId) {
+  Stream<Profile?> watchProfile(String userId) {
     return localDataSource.watchProfile(userId);
   }
 
