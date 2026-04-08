@@ -4,7 +4,7 @@ class SyncQueue extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get operationId => text()();
   TextColumn get entityType => text()();
-  IntColumn get entityId => integer()();
+  TextColumn get entityId => text()();
   TextColumn get operation => text()();
   TextColumn get data => text()();
   DateTimeColumn get createdAt => dateTime()();

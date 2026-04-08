@@ -25,6 +25,9 @@ class AppRouter {
       final isLoggingIn =
           state.matchedLocation == RouteNames.login ||
           state.matchedLocation == RouteNames.welcome;
+      final isOnCreateProfile =
+          state.matchedLocation == RouteNames.createProfile;
+      final isOnEditProfile = state.matchedLocation == RouteNames.editProfile;
 
       if (!isLoggedIn && !isLoggingIn) {
         return RouteNames.welcome;
@@ -33,7 +36,13 @@ class AppRouter {
       if (isLoggedIn &&
           (state.matchedLocation == RouteNames.login ||
               state.matchedLocation == RouteNames.welcome)) {
-        return RouteNames.home;
+        return RouteNames.createProfile;
+      }
+
+      if (isLoggedIn &&
+          (isOnCreateProfile || isOnEditProfile) &&
+          state.matchedLocation == RouteNames.home) {
+        return null;
       }
 
       return null;
@@ -57,7 +66,13 @@ class AppRouter {
       ),
       GoRoute(
         path: RouteNames.editProfile,
-        builder: (context, state) => const EditProfilePage(),
+        builder: (context, state) =>
+            const EditProfilePage(isInitialSetup: false),
+      ),
+      GoRoute(
+        path: RouteNames.createProfile,
+        builder: (context, state) =>
+            const EditProfilePage(isInitialSetup: true),
       ),
     ],
     errorBuilder: (context, state) =>

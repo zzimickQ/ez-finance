@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../core/router/route_names.dart';
+import '../../../profile/presentation/bloc/profile_bloc.dart';
+import '../../../profile/presentation/bloc/profile_event.dart';
+import '../../../profile/presentation/bloc/profile_state.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -37,6 +41,10 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _checkProfileAndNavigate(String userId) {
+    context.read<ProfileBloc>().add(LoadProfileEvent(userId: userId));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,9 +55,19 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is AuthAuthenticated) {
-            context.go(RouteNames.home);
+            _checkProfileAndNavigate(state.user.id);
+            await Future.delayed(const Duration(milliseconds: 100));
+            if (!context.mounted) return;
+            final profileState = context.read<ProfileBloc>().state;
+            if (profileState is ProfileLoaded) {
+              if (!context.mounted) return;
+              context.go(RouteNames.home);
+            } else {
+              if (!context.mounted) return;
+              context.go(RouteNames.createProfile);
+            }
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -145,9 +163,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 16),
                     TextButton(
-                      onPressed: () {
-                        // Forgot password functionality
-                      },
+                      onPressed: () {},
                       child: const Text('Forgot Password?'),
                     ),
                   ],

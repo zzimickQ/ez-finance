@@ -414,28 +414,12 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
   $ProfilesTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
     'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  @override
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-    'user_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'UNIQUE REFERENCES users (id)',
-    ),
   );
   static const VerificationMeta _firstNameMeta = const VerificationMeta(
     'firstName',
@@ -557,7 +541,6 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    userId,
     firstName,
     lastName,
     phone,
@@ -583,14 +566,8 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(
-        _userIdMeta,
-        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
-      );
     } else if (isInserting) {
-      context.missing(_userIdMeta);
+      context.missing(_idMeta);
     }
     if (data.containsKey('first_name')) {
       context.handle(
@@ -669,12 +646,8 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Profile(
       id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      userId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}user_id'],
+        data['${effectivePrefix}id'],
       )!,
       firstName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -726,8 +699,7 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
 }
 
 class Profile extends DataClass implements Insertable<Profile> {
-  final int id;
-  final String userId;
+  final String id;
   final String? firstName;
   final String? lastName;
   final String? phone;
@@ -740,7 +712,6 @@ class Profile extends DataClass implements Insertable<Profile> {
   final bool isDeleted;
   const Profile({
     required this.id,
-    required this.userId,
     this.firstName,
     this.lastName,
     this.phone,
@@ -755,8 +726,7 @@ class Profile extends DataClass implements Insertable<Profile> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['user_id'] = Variable<String>(userId);
+    map['id'] = Variable<String>(id);
     if (!nullToAbsent || firstName != null) {
       map['first_name'] = Variable<String>(firstName);
     }
@@ -783,7 +753,6 @@ class Profile extends DataClass implements Insertable<Profile> {
   ProfilesCompanion toCompanion(bool nullToAbsent) {
     return ProfilesCompanion(
       id: Value(id),
-      userId: Value(userId),
       firstName: firstName == null && nullToAbsent
           ? const Value.absent()
           : Value(firstName),
@@ -813,8 +782,7 @@ class Profile extends DataClass implements Insertable<Profile> {
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Profile(
-      id: serializer.fromJson<int>(json['id']),
-      userId: serializer.fromJson<String>(json['userId']),
+      id: serializer.fromJson<String>(json['id']),
       firstName: serializer.fromJson<String?>(json['firstName']),
       lastName: serializer.fromJson<String?>(json['lastName']),
       phone: serializer.fromJson<String?>(json['phone']),
@@ -831,8 +799,7 @@ class Profile extends DataClass implements Insertable<Profile> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'userId': serializer.toJson<String>(userId),
+      'id': serializer.toJson<String>(id),
       'firstName': serializer.toJson<String?>(firstName),
       'lastName': serializer.toJson<String?>(lastName),
       'phone': serializer.toJson<String?>(phone),
@@ -847,8 +814,7 @@ class Profile extends DataClass implements Insertable<Profile> {
   }
 
   Profile copyWith({
-    int? id,
-    String? userId,
+    String? id,
     Value<String?> firstName = const Value.absent(),
     Value<String?> lastName = const Value.absent(),
     Value<String?> phone = const Value.absent(),
@@ -861,7 +827,6 @@ class Profile extends DataClass implements Insertable<Profile> {
     bool? isDeleted,
   }) => Profile(
     id: id ?? this.id,
-    userId: userId ?? this.userId,
     firstName: firstName.present ? firstName.value : this.firstName,
     lastName: lastName.present ? lastName.value : this.lastName,
     phone: phone.present ? phone.value : this.phone,
@@ -876,7 +841,6 @@ class Profile extends DataClass implements Insertable<Profile> {
   Profile copyWithCompanion(ProfilesCompanion data) {
     return Profile(
       id: data.id.present ? data.id.value : this.id,
-      userId: data.userId.present ? data.userId.value : this.userId,
       firstName: data.firstName.present ? data.firstName.value : this.firstName,
       lastName: data.lastName.present ? data.lastName.value : this.lastName,
       phone: data.phone.present ? data.phone.value : this.phone,
@@ -896,7 +860,6 @@ class Profile extends DataClass implements Insertable<Profile> {
   String toString() {
     return (StringBuffer('Profile(')
           ..write('id: $id, ')
-          ..write('userId: $userId, ')
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
           ..write('phone: $phone, ')
@@ -914,7 +877,6 @@ class Profile extends DataClass implements Insertable<Profile> {
   @override
   int get hashCode => Object.hash(
     id,
-    userId,
     firstName,
     lastName,
     phone,
@@ -931,7 +893,6 @@ class Profile extends DataClass implements Insertable<Profile> {
       identical(this, other) ||
       (other is Profile &&
           other.id == this.id &&
-          other.userId == this.userId &&
           other.firstName == this.firstName &&
           other.lastName == this.lastName &&
           other.phone == this.phone &&
@@ -945,8 +906,7 @@ class Profile extends DataClass implements Insertable<Profile> {
 }
 
 class ProfilesCompanion extends UpdateCompanion<Profile> {
-  final Value<int> id;
-  final Value<String> userId;
+  final Value<String> id;
   final Value<String?> firstName;
   final Value<String?> lastName;
   final Value<String?> phone;
@@ -957,9 +917,9 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
   final Value<int> version;
   final Value<bool> isSynced;
   final Value<bool> isDeleted;
+  final Value<int> rowid;
   const ProfilesCompanion({
     this.id = const Value.absent(),
-    this.userId = const Value.absent(),
     this.firstName = const Value.absent(),
     this.lastName = const Value.absent(),
     this.phone = const Value.absent(),
@@ -970,10 +930,10 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     this.version = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   ProfilesCompanion.insert({
-    this.id = const Value.absent(),
-    required String userId,
+    required String id,
     this.firstName = const Value.absent(),
     this.lastName = const Value.absent(),
     this.phone = const Value.absent(),
@@ -984,12 +944,12 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     this.version = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
-  }) : userId = Value(userId),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<Profile> custom({
-    Expression<int>? id,
-    Expression<String>? userId,
+    Expression<String>? id,
     Expression<String>? firstName,
     Expression<String>? lastName,
     Expression<String>? phone,
@@ -1000,10 +960,10 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     Expression<int>? version,
     Expression<bool>? isSynced,
     Expression<bool>? isDeleted,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (userId != null) 'user_id': userId,
       if (firstName != null) 'first_name': firstName,
       if (lastName != null) 'last_name': lastName,
       if (phone != null) 'phone': phone,
@@ -1014,12 +974,12 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
       if (version != null) 'version': version,
       if (isSynced != null) 'is_synced': isSynced,
       if (isDeleted != null) 'is_deleted': isDeleted,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   ProfilesCompanion copyWith({
-    Value<int>? id,
-    Value<String>? userId,
+    Value<String>? id,
     Value<String?>? firstName,
     Value<String?>? lastName,
     Value<String?>? phone,
@@ -1030,10 +990,10 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     Value<int>? version,
     Value<bool>? isSynced,
     Value<bool>? isDeleted,
+    Value<int>? rowid,
   }) {
     return ProfilesCompanion(
       id: id ?? this.id,
-      userId: userId ?? this.userId,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       phone: phone ?? this.phone,
@@ -1044,6 +1004,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
       version: version ?? this.version,
       isSynced: isSynced ?? this.isSynced,
       isDeleted: isDeleted ?? this.isDeleted,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1051,10 +1012,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
+      map['id'] = Variable<String>(id.value);
     }
     if (firstName.present) {
       map['first_name'] = Variable<String>(firstName.value);
@@ -1086,6 +1044,9 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     if (isDeleted.present) {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -1093,7 +1054,6 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
   String toString() {
     return (StringBuffer('ProfilesCompanion(')
           ..write('id: $id, ')
-          ..write('userId: $userId, ')
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
           ..write('phone: $phone, ')
@@ -1103,7 +1063,8 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version, ')
           ..write('isSynced: $isSynced, ')
-          ..write('isDeleted: $isDeleted')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1154,11 +1115,11 @@ class $SyncQueueTable extends SyncQueue
     'entityId',
   );
   @override
-  late final GeneratedColumn<int> entityId = GeneratedColumn<int>(
+  late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
     'entity_id',
     aliasedName,
     false,
-    type: DriftSqlType.int,
+    type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _operationMeta = const VerificationMeta(
@@ -1346,7 +1307,7 @@ class $SyncQueueTable extends SyncQueue
         data['${effectivePrefix}entity_type'],
       )!,
       entityId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
+        DriftSqlType.string,
         data['${effectivePrefix}entity_id'],
       )!,
       operation: attachedDatabase.typeMapping.read(
@@ -1386,7 +1347,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   final int id;
   final String operationId;
   final String entityType;
-  final int entityId;
+  final String entityId;
   final String operation;
   final String data;
   final DateTime createdAt;
@@ -1411,7 +1372,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     map['id'] = Variable<int>(id);
     map['operation_id'] = Variable<String>(operationId);
     map['entity_type'] = Variable<String>(entityType);
-    map['entity_id'] = Variable<int>(entityId);
+    map['entity_id'] = Variable<String>(entityId);
     map['operation'] = Variable<String>(operation);
     map['data'] = Variable<String>(data);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -1449,7 +1410,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
       id: serializer.fromJson<int>(json['id']),
       operationId: serializer.fromJson<String>(json['operationId']),
       entityType: serializer.fromJson<String>(json['entityType']),
-      entityId: serializer.fromJson<int>(json['entityId']),
+      entityId: serializer.fromJson<String>(json['entityId']),
       operation: serializer.fromJson<String>(json['operation']),
       data: serializer.fromJson<String>(json['data']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -1465,7 +1426,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
       'id': serializer.toJson<int>(id),
       'operationId': serializer.toJson<String>(operationId),
       'entityType': serializer.toJson<String>(entityType),
-      'entityId': serializer.toJson<int>(entityId),
+      'entityId': serializer.toJson<String>(entityId),
       'operation': serializer.toJson<String>(operation),
       'data': serializer.toJson<String>(data),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -1479,7 +1440,7 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     int? id,
     String? operationId,
     String? entityType,
-    int? entityId,
+    String? entityId,
     String? operation,
     String? data,
     DateTime? createdAt,
@@ -1569,7 +1530,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   final Value<int> id;
   final Value<String> operationId;
   final Value<String> entityType;
-  final Value<int> entityId;
+  final Value<String> entityId;
   final Value<String> operation;
   final Value<String> data;
   final Value<DateTime> createdAt;
@@ -1592,7 +1553,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     this.id = const Value.absent(),
     required String operationId,
     required String entityType,
-    required int entityId,
+    required String entityId,
     required String operation,
     required String data,
     required DateTime createdAt,
@@ -1609,7 +1570,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     Expression<int>? id,
     Expression<String>? operationId,
     Expression<String>? entityType,
-    Expression<int>? entityId,
+    Expression<String>? entityId,
     Expression<String>? operation,
     Expression<String>? data,
     Expression<DateTime>? createdAt,
@@ -1635,7 +1596,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     Value<int>? id,
     Value<String>? operationId,
     Value<String>? entityType,
-    Value<int>? entityId,
+    Value<String>? entityId,
     Value<String>? operation,
     Value<String>? data,
     Value<DateTime>? createdAt,
@@ -1670,7 +1631,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
       map['entity_type'] = Variable<String>(entityType.value);
     }
     if (entityId.present) {
-      map['entity_id'] = Variable<int>(entityId.value);
+      map['entity_id'] = Variable<String>(entityId.value);
     }
     if (operation.present) {
       map['operation'] = Variable<String>(operation.value);
@@ -1749,30 +1710,6 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$UsersTableReferences
-    extends BaseReferences<_$AppDatabase, $UsersTable, User> {
-  $$UsersTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$ProfilesTable, List<Profile>> _profilesRefsTable(
-    _$AppDatabase db,
-  ) => MultiTypedResultKey.fromTable(
-    db.profiles,
-    aliasName: $_aliasNameGenerator(db.users.id, db.profiles.userId),
-  );
-
-  $$ProfilesTableProcessedTableManager get profilesRefs {
-    final manager = $$ProfilesTableTableManager(
-      $_db,
-      $_db.profiles,
-    ).filter((f) => f.userId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_profilesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
 class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
   $$UsersTableFilterComposer({
     required super.$db,
@@ -1810,31 +1747,6 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
     column: $table.isSynced,
     builder: (column) => ColumnFilters(column),
   );
-
-  Expression<bool> profilesRefs(
-    Expression<bool> Function($$ProfilesTableFilterComposer f) f,
-  ) {
-    final $$ProfilesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.profiles,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProfilesTableFilterComposer(
-            $db: $db,
-            $table: $db.profiles,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$UsersTableOrderingComposer
@@ -1903,31 +1815,6 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<bool> get isSynced =>
       $composableBuilder(column: $table.isSynced, builder: (column) => column);
-
-  Expression<T> profilesRefs<T extends Object>(
-    Expression<T> Function($$ProfilesTableAnnotationComposer a) f,
-  ) {
-    final $$ProfilesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.profiles,
-      getReferencedColumn: (t) => t.userId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ProfilesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.profiles,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$UsersTableTableManager
@@ -1941,9 +1828,9 @@ class $$UsersTableTableManager
           $$UsersTableAnnotationComposer,
           $$UsersTableCreateCompanionBuilder,
           $$UsersTableUpdateCompanionBuilder,
-          (User, $$UsersTableReferences),
+          (User, BaseReferences<_$AppDatabase, $UsersTable, User>),
           User,
-          PrefetchHooks Function({bool profilesRefs})
+          PrefetchHooks Function()
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
     : super(
@@ -1993,33 +1880,9 @@ class $$UsersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) =>
-                    (e.readTable(table), $$UsersTableReferences(db, table, e)),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({profilesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (profilesRefs) db.profiles],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (profilesRefs)
-                    await $_getPrefetchedData<User, $UsersTable, Profile>(
-                      currentTable: table,
-                      referencedTable: $$UsersTableReferences
-                          ._profilesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$UsersTableReferences(db, table, p0).profilesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.userId == item.id),
-                      typedResults: items,
-                    ),
-                ];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -2034,14 +1897,13 @@ typedef $$UsersTableProcessedTableManager =
       $$UsersTableAnnotationComposer,
       $$UsersTableCreateCompanionBuilder,
       $$UsersTableUpdateCompanionBuilder,
-      (User, $$UsersTableReferences),
+      (User, BaseReferences<_$AppDatabase, $UsersTable, User>),
       User,
-      PrefetchHooks Function({bool profilesRefs})
+      PrefetchHooks Function()
     >;
 typedef $$ProfilesTableCreateCompanionBuilder =
     ProfilesCompanion Function({
-      Value<int> id,
-      required String userId,
+      required String id,
       Value<String?> firstName,
       Value<String?> lastName,
       Value<String?> phone,
@@ -2052,11 +1914,11 @@ typedef $$ProfilesTableCreateCompanionBuilder =
       Value<int> version,
       Value<bool> isSynced,
       Value<bool> isDeleted,
+      Value<int> rowid,
     });
 typedef $$ProfilesTableUpdateCompanionBuilder =
     ProfilesCompanion Function({
-      Value<int> id,
-      Value<String> userId,
+      Value<String> id,
       Value<String?> firstName,
       Value<String?> lastName,
       Value<String?> phone,
@@ -2067,30 +1929,8 @@ typedef $$ProfilesTableUpdateCompanionBuilder =
       Value<int> version,
       Value<bool> isSynced,
       Value<bool> isDeleted,
+      Value<int> rowid,
     });
-
-final class $$ProfilesTableReferences
-    extends BaseReferences<_$AppDatabase, $ProfilesTable, Profile> {
-  $$ProfilesTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $UsersTable _userIdTable(_$AppDatabase db) => db.users.createAlias(
-    $_aliasNameGenerator(db.profiles.userId, db.users.id),
-  );
-
-  $$UsersTableProcessedTableManager get userId {
-    final $_column = $_itemColumn<String>('user_id')!;
-
-    final manager = $$UsersTableTableManager(
-      $_db,
-      $_db.users,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
 
 class $$ProfilesTableFilterComposer
     extends Composer<_$AppDatabase, $ProfilesTable> {
@@ -2101,7 +1941,7 @@ class $$ProfilesTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
+  ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
   );
@@ -2155,29 +1995,6 @@ class $$ProfilesTableFilterComposer
     column: $table.isDeleted,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$UsersTableFilterComposer get userId {
-    final $$UsersTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableFilterComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$ProfilesTableOrderingComposer
@@ -2189,7 +2006,7 @@ class $$ProfilesTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
+  ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
   );
@@ -2243,29 +2060,6 @@ class $$ProfilesTableOrderingComposer
     column: $table.isDeleted,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$UsersTableOrderingComposer get userId {
-    final $$UsersTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableOrderingComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$ProfilesTableAnnotationComposer
@@ -2277,7 +2071,7 @@ class $$ProfilesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
+  GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get firstName =>
@@ -2311,29 +2105,6 @@ class $$ProfilesTableAnnotationComposer
 
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
-
-  $$UsersTableAnnotationComposer get userId {
-    final $$UsersTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.userId,
-      referencedTable: $db.users,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$UsersTableAnnotationComposer(
-            $db: $db,
-            $table: $db.users,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$ProfilesTableTableManager
@@ -2347,9 +2118,9 @@ class $$ProfilesTableTableManager
           $$ProfilesTableAnnotationComposer,
           $$ProfilesTableCreateCompanionBuilder,
           $$ProfilesTableUpdateCompanionBuilder,
-          (Profile, $$ProfilesTableReferences),
+          (Profile, BaseReferences<_$AppDatabase, $ProfilesTable, Profile>),
           Profile,
-          PrefetchHooks Function({bool userId})
+          PrefetchHooks Function()
         > {
   $$ProfilesTableTableManager(_$AppDatabase db, $ProfilesTable table)
     : super(
@@ -2364,8 +2135,7 @@ class $$ProfilesTableTableManager
               $$ProfilesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                Value<String> userId = const Value.absent(),
+                Value<String> id = const Value.absent(),
                 Value<String?> firstName = const Value.absent(),
                 Value<String?> lastName = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
@@ -2376,9 +2146,9 @@ class $$ProfilesTableTableManager
                 Value<int> version = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion(
                 id: id,
-                userId: userId,
                 firstName: firstName,
                 lastName: lastName,
                 phone: phone,
@@ -2389,11 +2159,11 @@ class $$ProfilesTableTableManager
                 version: version,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
+                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
-                required String userId,
+                required String id,
                 Value<String?> firstName = const Value.absent(),
                 Value<String?> lastName = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
@@ -2404,9 +2174,9 @@ class $$ProfilesTableTableManager
                 Value<int> version = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion.insert(
                 id: id,
-                userId: userId,
                 firstName: firstName,
                 lastName: lastName,
                 phone: phone,
@@ -2417,56 +2187,12 @@ class $$ProfilesTableTableManager
                 version: version,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
+                rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$ProfilesTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({userId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (userId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.userId,
-                                referencedTable: $$ProfilesTableReferences
-                                    ._userIdTable(db),
-                                referencedColumn: $$ProfilesTableReferences
-                                    ._userIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -2481,16 +2207,16 @@ typedef $$ProfilesTableProcessedTableManager =
       $$ProfilesTableAnnotationComposer,
       $$ProfilesTableCreateCompanionBuilder,
       $$ProfilesTableUpdateCompanionBuilder,
-      (Profile, $$ProfilesTableReferences),
+      (Profile, BaseReferences<_$AppDatabase, $ProfilesTable, Profile>),
       Profile,
-      PrefetchHooks Function({bool userId})
+      PrefetchHooks Function()
     >;
 typedef $$SyncQueueTableCreateCompanionBuilder =
     SyncQueueCompanion Function({
       Value<int> id,
       required String operationId,
       required String entityType,
-      required int entityId,
+      required String entityId,
       required String operation,
       required String data,
       required DateTime createdAt,
@@ -2503,7 +2229,7 @@ typedef $$SyncQueueTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> operationId,
       Value<String> entityType,
-      Value<int> entityId,
+      Value<String> entityId,
       Value<String> operation,
       Value<String> data,
       Value<DateTime> createdAt,
@@ -2536,7 +2262,7 @@ class $$SyncQueueTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get entityId => $composableBuilder(
+  ColumnFilters<String> get entityId => $composableBuilder(
     column: $table.entityId,
     builder: (column) => ColumnFilters(column),
   );
@@ -2596,7 +2322,7 @@ class $$SyncQueueTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get entityId => $composableBuilder(
+  ColumnOrderings<String> get entityId => $composableBuilder(
     column: $table.entityId,
     builder: (column) => ColumnOrderings(column),
   );
@@ -2654,7 +2380,7 @@ class $$SyncQueueTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get entityId =>
+  GeneratedColumn<String> get entityId =>
       $composableBuilder(column: $table.entityId, builder: (column) => column);
 
   GeneratedColumn<String> get operation =>
@@ -2712,7 +2438,7 @@ class $$SyncQueueTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> operationId = const Value.absent(),
                 Value<String> entityType = const Value.absent(),
-                Value<int> entityId = const Value.absent(),
+                Value<String> entityId = const Value.absent(),
                 Value<String> operation = const Value.absent(),
                 Value<String> data = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -2736,7 +2462,7 @@ class $$SyncQueueTableTableManager
                 Value<int> id = const Value.absent(),
                 required String operationId,
                 required String entityType,
-                required int entityId,
+                required String entityId,
                 required String operation,
                 required String data,
                 required DateTime createdAt,

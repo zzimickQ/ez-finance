@@ -16,7 +16,7 @@ class AppDatabase extends _$AppDatabase {
   int get schemaVersion => 1;
 
   static QueryExecutor _openConnection() {
-    return driftDatabase(name: 'ez_finance_db');
+    return driftDatabase(name: 'ez_finance_db_v1');
   }
 
   Future<List<User>> getAllUsers() => select(users).get();
@@ -42,22 +42,21 @@ class AppDatabase extends _$AppDatabase {
     return (select(profiles)..where((p) => p.isDeleted.equals(false))).watch();
   }
 
-  Future<Profile?> getProfileByUserId(String userId) => (select(
-    profiles,
-  )..where((p) => p.userId.equals(userId))).getSingleOrNull();
+  Future<Profile?> getProfileByUserId(String userId) =>
+      (select(profiles)..where((p) => p.id.equals(userId))).getSingleOrNull();
 
   Stream<Profile?> watchProfileByUserId(String userId) =>
       (select(profiles)
-            ..where((p) => p.userId.equals(userId) & p.isDeleted.equals(false)))
+            ..where((p) => p.id.equals(userId) & p.isDeleted.equals(false)))
           .watchSingleOrNull();
 
-  Future<int> insertProfile(ProfilesCompanion profile) =>
-      into(profiles).insert(profile);
+  Future<Profile?> insertProfile(ProfilesCompanion profile) =>
+      into(profiles).insertReturning(profile);
 
   Future<bool> updateProfile(Profile profile) =>
       update(profiles).replace(profile);
 
-  Future<int> softDeleteProfile(int id) =>
+  Future<int> softDeleteProfile(String id) =>
       (update(profiles)..where((p) => p.id.equals(id))).write(
         const ProfilesCompanion(isDeleted: Value(true)),
       );

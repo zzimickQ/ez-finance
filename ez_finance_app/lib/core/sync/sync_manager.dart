@@ -1,17 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
-import '../database/app_database.dart';
-import '../network/network_info.dart';
+
 import '../api/api_client.dart';
 import '../api/api_endpoints.dart';
+import '../database/app_database.dart';
+import '../network/network_info.dart';
 
 enum SyncStatus { idle, syncing, pending, offline, error }
 
 class SyncOperation {
   final String entityType;
-  final int entityId;
+  final String entityId;
   final String operation;
   final Map<String, dynamic> data;
   final int priority;
@@ -170,10 +172,10 @@ class SyncManager {
     }
   }
 
-  String _getEndpoint(String entityType, int entityId) {
+  String _getEndpoint(String entityType, String entityId) {
     switch (entityType) {
       case 'profile':
-        return entityId == 0
+        return entityId == ''
             ? ApiEndpoints.profile
             : ApiEndpoints.profileById(entityId);
       default:
@@ -213,7 +215,7 @@ class SyncManager {
   Future<void> _saveRemoteProfile(Map<String, dynamic> data) async {
     await _db.insertProfile(
       ProfilesCompanion(
-        userId: Value(data['user_id'] ?? 0),
+        id: Value(data['id']),
         firstName: Value(data['first_name']),
         lastName: Value(data['last_name']),
         phone: Value(data['phone']),

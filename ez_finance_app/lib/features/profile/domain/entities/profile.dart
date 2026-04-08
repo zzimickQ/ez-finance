@@ -1,8 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class Profile extends Equatable {
-  final int id;
-  final String userId;
+  final String id;
   final String? firstName;
   final String? lastName;
   final String? phone;
@@ -15,7 +14,6 @@ class Profile extends Equatable {
 
   const Profile({
     required this.id,
-    required this.userId,
     this.firstName,
     this.lastName,
     this.phone,
@@ -30,7 +28,7 @@ class Profile extends Equatable {
   String get fullName => '${firstName ?? ''} ${lastName ?? ''}'.trim();
 
   Profile copyWith({
-    int? id,
+    String? id,
     String? userId,
     String? firstName,
     String? lastName,
@@ -44,7 +42,6 @@ class Profile extends Equatable {
   }) {
     return Profile(
       id: id ?? this.id,
-      userId: userId ?? this.userId,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       phone: phone ?? this.phone,
@@ -60,7 +57,6 @@ class Profile extends Equatable {
   @override
   List<Object?> get props => [
     id,
-    userId,
     firstName,
     lastName,
     phone,

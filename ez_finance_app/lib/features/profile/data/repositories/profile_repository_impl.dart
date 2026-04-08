@@ -82,7 +82,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Map<String, dynamic> _entityToJson(Profile profile) {
     return {
       'id': profile.id,
-      'user_id': profile.userId,
       'first_name': profile.firstName,
       'last_name': profile.lastName,
       'phone': profile.phone,
@@ -97,7 +96,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
   ProfileModel _entityToModel(Profile profile) {
     return ProfileModel(
       id: profile.id,
-      userId: profile.userId,
       firstName: profile.firstName,
       lastName: profile.lastName,
       phone: profile.phone,

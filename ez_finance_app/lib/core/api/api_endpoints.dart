@@ -8,5 +8,5 @@ class ApiEndpoints {
 
   static const String profile = 'api/user/profile';
 
-  static String profileById(int id) => 'api/user/profile/$id';
+  static String profileById(String id) => 'api/user/profile/$id';
 }

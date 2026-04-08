@@ -1,10 +1,7 @@
 import 'package:drift/drift.dart';
 
-import 'users_table.dart';
-
 class Profiles extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get userId => text().unique().references(Users, #id)();
+  TextColumn get id => text()();
   TextColumn get firstName => text().nullable()();
   TextColumn get lastName => text().nullable()();
   TextColumn get phone => text().nullable()();
@@ -15,4 +12,7 @@ class Profiles extends Table {
   IntColumn get version => integer().withDefault(const Constant(1))();
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }
