@@ -86,9 +86,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
       'last_name': profile.lastName,
       'phone': profile.phone,
       'address': profile.address,
-      'date_of_birth': profile.dateOfBirth?.toIso8601String(),
-      'created_at': profile.createdAt.toIso8601String(),
-      'updated_at': profile.updatedAt.toIso8601String(),
+      'dateOfBirth': profile.dateOfBirth?.toIso8601String(),
+      'createdAt': profile.createdAt.toIso8601String(),
+      'updatedAt': profile.updatedAt.toIso8601String(),
       'version': profile.version,
     };
   }
@@ -103,8 +103,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
       dateOfBirth: profile.dateOfBirth,
       createdAt: profile.createdAt,
       updatedAt: profile.updatedAt,
-      version: profile.version,
-      isSynced: profile.isSynced,
     );
   }
 }

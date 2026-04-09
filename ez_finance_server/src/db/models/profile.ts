@@ -1,8 +1,9 @@
-import mongoose, { SchemaTypes } from "mongoose";
+import mongoose, { SchemaTypes, Types } from "mongoose";
 
 const { String, Date, Boolean, Number } = SchemaTypes;
 
 export interface IProfile {
+  userId: Types.ObjectId;
   firstName?: string;
   lastName?: string;
   phone?: string;
@@ -14,6 +15,7 @@ export interface IProfile {
 
 const profileSchema = new mongoose.Schema<IProfile>(
   {
+    userId: { type: SchemaTypes.ObjectId, required: true },
     firstName: { type: String },
     lastName: { type: String },
     phone: { type: String },

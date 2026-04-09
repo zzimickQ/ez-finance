@@ -42,12 +42,13 @@ class AppDatabase extends _$AppDatabase {
     return (select(profiles)..where((p) => p.isDeleted.equals(false))).watch();
   }
 
-  Future<Profile?> getProfileByUserId(String userId) =>
-      (select(profiles)..where((p) => p.id.equals(userId))).getSingleOrNull();
+  Future<Profile?> getProfileByUserId(String userId) => (select(
+    profiles,
+  )..where((p) => p.userId.equals(userId))).getSingleOrNull();
 
   Stream<Profile?> watchProfileByUserId(String userId) =>
       (select(profiles)
-            ..where((p) => p.id.equals(userId) & p.isDeleted.equals(false)))
+            ..where((p) => p.userId.equals(userId) & p.isDeleted.equals(false)))
           .watchSingleOrNull();
 
   Future<Profile?> insertProfile(ProfilesCompanion profile) =>

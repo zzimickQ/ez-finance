@@ -35,6 +35,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
     final result = await db.insertProfile(
       ProfilesCompanion.insert(
         id: profile.id,
+        userId: profile.userId,
         firstName: Value(profile.firstName),
         lastName: Value(profile.lastName),
         phone: Value(profile.phone),
@@ -59,6 +60,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
     await db.updateProfile(
       Profile(
         id: updatedProfile.id,
+        userId: updatedProfile.userId,
         firstName: updatedProfile.firstName,
         lastName: updatedProfile.lastName,
         phone: updatedProfile.phone,
@@ -78,6 +80,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
   entity.Profile _mapToEntity(Profile profile) {
     return entity.Profile(
       id: profile.id,
+      userId: profile.userId,
       firstName: profile.firstName,
       lastName: profile.lastName,
       phone: profile.phone,

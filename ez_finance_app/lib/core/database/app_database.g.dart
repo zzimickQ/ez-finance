@@ -421,6 +421,15 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _firstNameMeta = const VerificationMeta(
     'firstName',
   );
@@ -541,6 +550,7 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    userId,
     firstName,
     lastName,
     phone,
@@ -568,6 +578,14 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
     }
     if (data.containsKey('first_name')) {
       context.handle(
@@ -649,6 +667,10 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
       firstName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}first_name'],
@@ -700,6 +722,7 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
 
 class Profile extends DataClass implements Insertable<Profile> {
   final String id;
+  final String userId;
   final String? firstName;
   final String? lastName;
   final String? phone;
@@ -712,6 +735,7 @@ class Profile extends DataClass implements Insertable<Profile> {
   final bool isDeleted;
   const Profile({
     required this.id,
+    required this.userId,
     this.firstName,
     this.lastName,
     this.phone,
@@ -727,6 +751,7 @@ class Profile extends DataClass implements Insertable<Profile> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    map['user_id'] = Variable<String>(userId);
     if (!nullToAbsent || firstName != null) {
       map['first_name'] = Variable<String>(firstName);
     }
@@ -753,6 +778,7 @@ class Profile extends DataClass implements Insertable<Profile> {
   ProfilesCompanion toCompanion(bool nullToAbsent) {
     return ProfilesCompanion(
       id: Value(id),
+      userId: Value(userId),
       firstName: firstName == null && nullToAbsent
           ? const Value.absent()
           : Value(firstName),
@@ -783,6 +809,7 @@ class Profile extends DataClass implements Insertable<Profile> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Profile(
       id: serializer.fromJson<String>(json['id']),
+      userId: serializer.fromJson<String>(json['userId']),
       firstName: serializer.fromJson<String?>(json['firstName']),
       lastName: serializer.fromJson<String?>(json['lastName']),
       phone: serializer.fromJson<String?>(json['phone']),
@@ -800,6 +827,7 @@ class Profile extends DataClass implements Insertable<Profile> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'userId': serializer.toJson<String>(userId),
       'firstName': serializer.toJson<String?>(firstName),
       'lastName': serializer.toJson<String?>(lastName),
       'phone': serializer.toJson<String?>(phone),
@@ -815,6 +843,7 @@ class Profile extends DataClass implements Insertable<Profile> {
 
   Profile copyWith({
     String? id,
+    String? userId,
     Value<String?> firstName = const Value.absent(),
     Value<String?> lastName = const Value.absent(),
     Value<String?> phone = const Value.absent(),
@@ -827,6 +856,7 @@ class Profile extends DataClass implements Insertable<Profile> {
     bool? isDeleted,
   }) => Profile(
     id: id ?? this.id,
+    userId: userId ?? this.userId,
     firstName: firstName.present ? firstName.value : this.firstName,
     lastName: lastName.present ? lastName.value : this.lastName,
     phone: phone.present ? phone.value : this.phone,
@@ -841,6 +871,7 @@ class Profile extends DataClass implements Insertable<Profile> {
   Profile copyWithCompanion(ProfilesCompanion data) {
     return Profile(
       id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
       firstName: data.firstName.present ? data.firstName.value : this.firstName,
       lastName: data.lastName.present ? data.lastName.value : this.lastName,
       phone: data.phone.present ? data.phone.value : this.phone,
@@ -860,6 +891,7 @@ class Profile extends DataClass implements Insertable<Profile> {
   String toString() {
     return (StringBuffer('Profile(')
           ..write('id: $id, ')
+          ..write('userId: $userId, ')
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
           ..write('phone: $phone, ')
@@ -877,6 +909,7 @@ class Profile extends DataClass implements Insertable<Profile> {
   @override
   int get hashCode => Object.hash(
     id,
+    userId,
     firstName,
     lastName,
     phone,
@@ -893,6 +926,7 @@ class Profile extends DataClass implements Insertable<Profile> {
       identical(this, other) ||
       (other is Profile &&
           other.id == this.id &&
+          other.userId == this.userId &&
           other.firstName == this.firstName &&
           other.lastName == this.lastName &&
           other.phone == this.phone &&
@@ -907,6 +941,7 @@ class Profile extends DataClass implements Insertable<Profile> {
 
 class ProfilesCompanion extends UpdateCompanion<Profile> {
   final Value<String> id;
+  final Value<String> userId;
   final Value<String?> firstName;
   final Value<String?> lastName;
   final Value<String?> phone;
@@ -920,6 +955,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
   final Value<int> rowid;
   const ProfilesCompanion({
     this.id = const Value.absent(),
+    this.userId = const Value.absent(),
     this.firstName = const Value.absent(),
     this.lastName = const Value.absent(),
     this.phone = const Value.absent(),
@@ -934,6 +970,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
   });
   ProfilesCompanion.insert({
     required String id,
+    required String userId,
     this.firstName = const Value.absent(),
     this.lastName = const Value.absent(),
     this.phone = const Value.absent(),
@@ -946,10 +983,12 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
+       userId = Value(userId),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<Profile> custom({
     Expression<String>? id,
+    Expression<String>? userId,
     Expression<String>? firstName,
     Expression<String>? lastName,
     Expression<String>? phone,
@@ -964,6 +1003,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
       if (firstName != null) 'first_name': firstName,
       if (lastName != null) 'last_name': lastName,
       if (phone != null) 'phone': phone,
@@ -980,6 +1020,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
 
   ProfilesCompanion copyWith({
     Value<String>? id,
+    Value<String>? userId,
     Value<String?>? firstName,
     Value<String?>? lastName,
     Value<String?>? phone,
@@ -994,6 +1035,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
   }) {
     return ProfilesCompanion(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       phone: phone ?? this.phone,
@@ -1013,6 +1055,9 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
     }
     if (firstName.present) {
       map['first_name'] = Variable<String>(firstName.value);
@@ -1054,6 +1099,7 @@ class ProfilesCompanion extends UpdateCompanion<Profile> {
   String toString() {
     return (StringBuffer('ProfilesCompanion(')
           ..write('id: $id, ')
+          ..write('userId: $userId, ')
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
           ..write('phone: $phone, ')
@@ -1904,6 +1950,7 @@ typedef $$UsersTableProcessedTableManager =
 typedef $$ProfilesTableCreateCompanionBuilder =
     ProfilesCompanion Function({
       required String id,
+      required String userId,
       Value<String?> firstName,
       Value<String?> lastName,
       Value<String?> phone,
@@ -1919,6 +1966,7 @@ typedef $$ProfilesTableCreateCompanionBuilder =
 typedef $$ProfilesTableUpdateCompanionBuilder =
     ProfilesCompanion Function({
       Value<String> id,
+      Value<String> userId,
       Value<String?> firstName,
       Value<String?> lastName,
       Value<String?> phone,
@@ -1943,6 +1991,11 @@ class $$ProfilesTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2011,6 +2064,11 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get firstName => $composableBuilder(
     column: $table.firstName,
     builder: (column) => ColumnOrderings(column),
@@ -2074,6 +2132,9 @@ class $$ProfilesTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
   GeneratedColumn<String> get firstName =>
       $composableBuilder(column: $table.firstName, builder: (column) => column);
 
@@ -2136,6 +2197,7 @@ class $$ProfilesTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<String> userId = const Value.absent(),
                 Value<String?> firstName = const Value.absent(),
                 Value<String?> lastName = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
@@ -2149,6 +2211,7 @@ class $$ProfilesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion(
                 id: id,
+                userId: userId,
                 firstName: firstName,
                 lastName: lastName,
                 phone: phone,
@@ -2164,6 +2227,7 @@ class $$ProfilesTableTableManager
           createCompanionCallback:
               ({
                 required String id,
+                required String userId,
                 Value<String?> firstName = const Value.absent(),
                 Value<String?> lastName = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
@@ -2177,6 +2241,7 @@ class $$ProfilesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ProfilesCompanion.insert(
                 id: id,
+                userId: userId,
                 firstName: firstName,
                 lastName: lastName,
                 phone: phone,

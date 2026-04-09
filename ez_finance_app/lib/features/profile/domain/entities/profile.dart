@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class Profile extends Equatable {
   final String id;
+  final String userId;
   final String? firstName;
   final String? lastName;
   final String? phone;
@@ -14,6 +15,7 @@ class Profile extends Equatable {
 
   const Profile({
     required this.id,
+    required this.userId,
     this.firstName,
     this.lastName,
     this.phone,
@@ -42,6 +44,7 @@ class Profile extends Equatable {
   }) {
     return Profile(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       phone: phone ?? this.phone,

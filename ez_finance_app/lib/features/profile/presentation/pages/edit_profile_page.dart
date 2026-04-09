@@ -67,6 +67,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       final updatedProfile = Profile(
         id: authState.user.id,
+        userId: authState.user.id,
         firstName: _firstNameController.text.trim().isEmpty
             ? null
             : _firstNameController.text.trim(),

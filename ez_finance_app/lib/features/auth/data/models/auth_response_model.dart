@@ -1,16 +1,19 @@
 import 'package:equatable/equatable.dart';
+import 'package:ez_finance_app/features/profile/data/models/profile_model.dart';
 
 class AuthResponseModel extends Equatable {
   final String? accessToken;
   final String? refreshToken;
   final String? sessionToken;
   final UserModel? user;
+  final ProfileModel? profile;
 
   const AuthResponseModel({
     this.accessToken,
     this.refreshToken,
     this.sessionToken,
     this.user,
+    this.profile,
   });
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
@@ -21,6 +24,9 @@ class AuthResponseModel extends Equatable {
       user: json['user'] != null
           ? UserModel.fromJson(json['user'] as Map<String, dynamic>)
           : null,
+      profile: json['profile'] != null
+          ? ProfileModel.fromJson(json['profile'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -30,11 +36,18 @@ class AuthResponseModel extends Equatable {
       'refreshToken': refreshToken,
       'sessionToken': sessionToken,
       'user': user?.toJson(),
+      'profile': profile?.toJson(),
     };
   }
 
   @override
-  List<Object?> get props => [accessToken, refreshToken, sessionToken, user];
+  List<Object?> get props => [
+    accessToken,
+    refreshToken,
+    sessionToken,
+    user,
+    profile,
+  ];
 }
 
 class UserModel extends Equatable {

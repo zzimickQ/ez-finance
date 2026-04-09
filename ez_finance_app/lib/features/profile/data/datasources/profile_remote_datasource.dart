@@ -4,7 +4,6 @@ import '../models/profile_model.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<ProfileModel?> getProfile();
-  Future<ProfileModel> createProfile(ProfileModel profile);
   Future<ProfileModel> updateProfile(ProfileModel profile);
 }
 
@@ -24,15 +23,6 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     } catch (e) {
       return null;
     }
-  }
-
-  @override
-  Future<ProfileModel> createProfile(ProfileModel profile) async {
-    final response = await apiClient.post(
-      ApiEndpoints.profile,
-      data: profile.toJson(),
-    );
-    return ProfileModel.fromJson(response.data);
   }
 
   @override

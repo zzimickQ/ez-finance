@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 class Profiles extends Table {
   TextColumn get id => text()();
+  TextColumn get userId => text()();
   TextColumn get firstName => text().nullable()();
   TextColumn get lastName => text().nullable()();
   TextColumn get phone => text().nullable()();

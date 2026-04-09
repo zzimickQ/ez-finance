@@ -189,8 +189,9 @@ class SyncManager {
       if (response.data != null) {
         await _mergeRemoteData(response.data);
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('Failed to pull remote changes: $e');
+      print('Stack trace: $stackTrace');
     }
   }
 
@@ -198,14 +199,14 @@ class SyncManager {
     if (remoteData is Map<String, dynamic>) {
       final remoteProfile = remoteData;
       final localProfile = await _db.getProfileByUserId(
-        remoteProfile['user_id'] ?? 0,
+        remoteProfile['userId'] ?? '',
       );
 
       if (localProfile == null) {
         await _saveRemoteProfile(remoteProfile);
-      } else if (remoteProfile['updated_at'] != null &&
+      } else if (remoteProfile['updatedAt'] != null &&
           localProfile.updatedAt.isBefore(
-            DateTime.parse(remoteProfile['updated_at']),
+            DateTime.parse(remoteProfile['updatedAt']),
           )) {
         await _saveRemoteProfile(remoteProfile);
       }
@@ -216,13 +217,14 @@ class SyncManager {
     await _db.insertProfile(
       ProfilesCompanion(
         id: Value(data['id']),
-        firstName: Value(data['first_name']),
-        lastName: Value(data['last_name']),
+        userId: Value(data['userId']),
+        firstName: Value(data['firstName']),
+        lastName: Value(data['lastName']),
         phone: Value(data['phone']),
         address: Value(data['address']),
         dateOfBirth: Value(
-          data['date_of_birth'] != null
-              ? DateTime.parse(data['date_of_birth'])
+          data['dateOfBirth'] != null
+              ? DateTime.parse(data['dateOfBirth'])
               : null,
         ),
         createdAt: Value(DateTime.now()),

@@ -4,40 +4,11 @@ import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
 import { ProfileModel, UserModel } from "../db";
 import { authMiddleware, AuthRequest } from "../middleware/auth";
+import StatusCodes from "http-status-codes";
+import { formatProfileResponse } from "./responses";
+import * as utils from "../utils";
 
 const authRouter = Router();
-const JWT_SECRET: string = process.env.JWT_SECRET ?? "your-secret-key";
-const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN ?? "1h";
-const REFRESH_TOKEN_EXPIRES_IN: string = process.env.REFRESH_TOKEN_EXPIRES_IN ?? "1m";
-
-const generateTokens = (userId: string | Types.ObjectId) => {
-  const content = { userId };
-  const secret = JWT_SECRET;
-  const accessToken = jwt.sign(content, secret, {
-    expiresIn: JWT_EXPIRES_IN as any,
-  });
-  const refreshToken = jwt.sign(content, secret, {
-    expiresIn: REFRESH_TOKEN_EXPIRES_IN as any,
-  });
-  return { accessToken, refreshToken };
-};
-
-function formatProfileResponse(profile: any) {
-  return {
-    id: profile._id,
-    firstName: profile.firstName,
-    lastName: profile.lastName,
-    phone: profile.phone,
-    address: profile.address,
-    dateOfBirth: profile.dateOfBirth,
-    createdAt: profile.createdAt,
-    updatedAt: profile.updatedAt,
-  };
-}
-
-function generateUserId(): string {
-  return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
 
 authRouter.post("/register", async (req, res) => {
   try {
@@ -62,21 +33,14 @@ authRouter.post("/register", async (req, res) => {
 
     await newUser.save();
 
-    const profile = new ProfileModel({
-      _id: newUser._id,
-    });
+    const tokens = utils.generateTokens(newUser._id);
 
-    await profile.save();
-
-    const tokens = generateTokens(newUser._id);
-
-    res.status(201).json({
+    res.status(StatusCodes.CREATED).json({
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       user: {
         id: newUser._id,
         email,
-        profile: formatProfileResponse(profile),
       },
     });
   } catch (error) {
@@ -105,7 +69,7 @@ authRouter.post("/login", async (req, res) => {
     }
 
     const profile = await ProfileModel.findOne({ _id: user._id });
-    const tokens = generateTokens(user._id);
+    const tokens = utils.generateTokens(user._id);
 
     res.json({
       accessToken: tokens.accessToken,
@@ -135,8 +99,8 @@ authRouter.post("/refresh", async (req, res) => {
       return res.status(400).json({ error: "Refresh token required" });
     }
 
-    const decoded = jwt.verify(refreshToken, JWT_SECRET) as { userId: string };
-    const tokens = generateTokens(decoded.userId);
+    const decoded = utils.verifyAndDecodeToken(refreshToken);
+    const tokens = utils.generateTokens(decoded.userId);
 
     res.json({
       accessToken: tokens.accessToken,
