@@ -8,9 +8,7 @@ class GetProfileUseCase {
 
   Future<Profile?> call(String userId) async {
     final profile = await repository.getProfile(userId);
-    if (profile == null) {
-      await repository.syncAll();
-    }
+    await repository.syncAll();
     return profile;
   }
 

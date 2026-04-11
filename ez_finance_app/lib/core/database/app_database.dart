@@ -16,7 +16,7 @@ class AppDatabase extends _$AppDatabase {
   int get schemaVersion => 1;
 
   static QueryExecutor _openConnection() {
-    return driftDatabase(name: 'ez_finance_db_v1');
+    return driftDatabase(name: 'ez_finance_db');
   }
 
   Future<List<User>> getAllUsers() => select(users).get();
@@ -42,9 +42,10 @@ class AppDatabase extends _$AppDatabase {
     return (select(profiles)..where((p) => p.isDeleted.equals(false))).watch();
   }
 
-  Future<Profile?> getProfileByUserId(String userId) => (select(
-    profiles,
-  )..where((p) => p.userId.equals(userId))).getSingleOrNull();
+  Future<Profile?> getProfileByUserId(String userId) =>
+      (select(profiles)..where((p) => p.userId.equals(userId))).get().then(
+        (result) => result.firstOrNull,
+      );
 
   Stream<Profile?> watchProfileByUserId(String userId) =>
       (select(profiles)
@@ -52,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
           .watchSingleOrNull();
 
   Future<Profile?> insertProfile(ProfilesCompanion profile) =>
-      into(profiles).insertReturning(profile);
+      into(profiles).insertReturning(profile, mode: InsertMode.insertOrReplace);
 
   Future<bool> updateProfile(Profile profile) =>
       update(profiles).replace(profile);

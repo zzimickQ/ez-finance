@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
+import 'features/profile/presentation/bloc/profile_event.dart';
 import 'injection_container.dart';
 
 class App extends StatefulWidget {
@@ -23,7 +25,11 @@ class _AppState extends State<App> {
     super.initState();
     _authBloc = getIt<AuthBloc>();
     _profileBloc = getIt<ProfileBloc>();
-    _appRouter = AppRouter(authBloc: _authBloc, secureStorage: getIt());
+    _appRouter = AppRouter(
+      authBloc: _authBloc,
+      profileBloc: _profileBloc,
+      secureStorage: getIt(),
+    );
   }
 
   @override
@@ -40,13 +46,21 @@ class _AppState extends State<App> {
         BlocProvider<AuthBloc>.value(value: _authBloc),
         BlocProvider<ProfileBloc>.value(value: _profileBloc),
       ],
-      child: MaterialApp.router(
-        title: 'EZ Finance',
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        routerConfig: _appRouter.router,
-        debugShowCheckedModeBanner: false,
+      child: BlocListener<AuthBloc, AuthState>(
+        bloc: _authBloc,
+        listener: (context, authState) {
+          if (authState is AuthAuthenticated) {
+            _profileBloc.add(LoadProfileEvent(userId: authState.user.id));
+          }
+        },
+        child: MaterialApp.router(
+          title: 'EZ Finance',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.system,
+          routerConfig: _appRouter.router,
+          debugShowCheckedModeBanner: false,
+        ),
       ),
     );
   }

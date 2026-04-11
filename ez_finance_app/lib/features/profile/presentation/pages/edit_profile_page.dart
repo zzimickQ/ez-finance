@@ -118,157 +118,136 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: !widget.isInitialSetup,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && widget.isInitialSetup) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please complete your profile to continue'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(_isCreateMode ? 'Complete Your Profile' : 'Edit Profile'),
-          automaticallyImplyLeading: !widget.isInitialSetup,
-          leading: widget.isInitialSetup
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => context.pop(),
-                ),
-        ),
-        body: BlocListener<ProfileBloc, ProfileState>(
-          listener: (context, state) {
-            if (state is ProfileUpdated || state is ProfileLoaded) {
-              Profile? savedProfile;
-              if (state is ProfileUpdated) {
-                savedProfile = state.profile;
-              } else if (state is ProfileLoaded && _isCreateMode) {
-                savedProfile = state.profile;
-              }
-
-              if (savedProfile != null || (!_isCreateMode)) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      _isCreateMode
-                          ? 'Profile created successfully'
-                          : 'Profile updated successfully',
-                    ),
-                  ),
-                );
-                if (widget.isInitialSetup) {
-                  context.go(RouteNames.home);
-                } else {
-                  context.pop();
-                }
-              }
-            } else if (state is ProfileError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          },
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (_isCreateMode) ...[
-                    const Text(
-                      'Please fill in your details to get started',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                  TextFormField(
-                    controller: _firstNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'First Name',
-                      prefixIcon: Icon(Icons.person_outline),
-                    ),
-                    textInputAction: TextInputAction.next,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _lastNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Last Name',
-                      prefixIcon: Icon(Icons.person_outline),
-                    ),
-                    textInputAction: TextInputAction.next,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _phoneController,
-                    decoration: const InputDecoration(
-                      labelText: 'Phone',
-                      prefixIcon: Icon(Icons.phone_outlined),
-                    ),
-                    keyboardType: TextInputType.phone,
-                    textInputAction: TextInputAction.next,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _addressController,
-                    decoration: const InputDecoration(
-                      labelText: 'Address',
-                      prefixIcon: Icon(Icons.location_on_outlined),
-                    ),
-                    maxLines: 3,
-                    textInputAction: TextInputAction.next,
-                  ),
-                  const SizedBox(height: 16),
-                  InkWell(
-                    onTap: _selectDateOfBirth,
-                    child: InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Date of Birth',
-                        prefixIcon: Icon(Icons.calendar_today_outlined),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            _dateOfBirth != null
-                                ? '${_dateOfBirth!.day}/${_dateOfBirth!.month}/${_dateOfBirth!.year}'
-                                : 'Select date',
-                          ),
-                          const Icon(Icons.arrow_drop_down),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  BlocBuilder<ProfileBloc, ProfileState>(
-                    builder: (context, state) {
-                      final isLoading =
-                          state is ProfileLoaded && state.isSyncing;
-                      return ElevatedButton(
-                        onPressed: isLoading ? null : _onSave,
-                        child: isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(_isCreateMode ? 'Continue' : 'Save Changes'),
-                      );
-                    },
-                  ),
-                ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_isCreateMode ? 'Complete Your Profile' : 'Edit Profile'),
+        automaticallyImplyLeading: !widget.isInitialSetup,
+        leading: widget.isInitialSetup
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => context.pop(),
               ),
+      ),
+      body: BlocListener<ProfileBloc, ProfileState>(
+        listener: (context, state) {
+          print(state);
+          if (state is ProfileUpdated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  _isCreateMode
+                      ? 'Profile created successfully'
+                      : 'Profile updated successfully',
+                ),
+              ),
+            );
+
+            if (widget.isInitialSetup) {
+              context.go(RouteNames.home);
+              return;
+            }
+
+            context.pop();
+            return;
+          } else if (state is ProfileError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_isCreateMode) ...[
+                  const Text(
+                    'Please fill in your details to get started',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+                TextFormField(
+                  controller: _firstNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'First Name',
+                    prefixIcon: Icon(Icons.person_outline),
+                  ),
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _lastNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Last Name',
+                    prefixIcon: Icon(Icons.person_outline),
+                  ),
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _phoneController,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone',
+                    prefixIcon: Icon(Icons.phone_outlined),
+                  ),
+                  keyboardType: TextInputType.phone,
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _addressController,
+                  decoration: const InputDecoration(
+                    labelText: 'Address',
+                    prefixIcon: Icon(Icons.location_on_outlined),
+                  ),
+                  maxLines: 3,
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: _selectDateOfBirth,
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Date of Birth',
+                      prefixIcon: Icon(Icons.calendar_today_outlined),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _dateOfBirth != null
+                              ? '${_dateOfBirth!.day}/${_dateOfBirth!.month}/${_dateOfBirth!.year}'
+                              : 'Select date',
+                        ),
+                        const Icon(Icons.arrow_drop_down),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                BlocBuilder<ProfileBloc, ProfileState>(
+                  builder: (context, state) {
+                    final isLoading = state is ProfileLoaded && state.isSyncing;
+                    return ElevatedButton(
+                      onPressed: isLoading ? null : _onSave,
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(_isCreateMode ? 'Continue' : 'Save Changes'),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),

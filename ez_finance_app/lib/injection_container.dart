@@ -1,19 +1,21 @@
-import 'package:get_it/get_it.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
+import 'package:ez_finance_app/features/auth/data/datasources/user_local_datasource.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get_it/get_it.dart';
 
-import 'core/database/app_database.dart';
 import 'core/api/api_client.dart';
+import 'core/database/app_database.dart';
 import 'core/network/network_info.dart';
 import 'core/sync/sync_manager.dart';
+import 'core/utils/time_service.dart';
 import 'features/auth/data/datasources/auth_local_datasource.dart';
 import 'features/auth/data/datasources/auth_remote_datasource.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
+import 'features/auth/domain/usecases/check_auth_status_usecase.dart';
 import 'features/auth/domain/usecases/login_usecase.dart';
 import 'features/auth/domain/usecases/logout_usecase.dart';
-import 'features/auth/domain/usecases/check_auth_status_usecase.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/profile/data/datasources/profile_local_datasource.dart';
 import 'features/profile/data/datasources/profile_remote_datasource.dart';
@@ -44,6 +46,8 @@ Future<void> _initExternal() async {
   getIt.registerLazySingleton<Connectivity>(() => Connectivity());
 
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
+
+  getIt.registerLazySingleton<TimeService>(() => SystemTimeService());
 }
 
 Future<void> _initCore() async {
@@ -63,6 +67,7 @@ Future<void> _initCore() async {
       db: getIt<AppDatabase>(),
       apiClient: getIt<ApiClient>(),
       networkInfo: getIt<NetworkInfo>(),
+      authBloc: getIt<AuthBloc>(),
     ),
   );
 }
@@ -71,6 +76,9 @@ void _initAuth() {
   getIt.registerLazySingleton<AuthLocalDataSource>(
     () => AuthLocalDataSourceImpl(secureStorage: getIt<FlutterSecureStorage>()),
   );
+  getIt.registerLazySingleton<UserLocalDatasource>(
+    () => UserLocalDatasourceImpl(secureStorage: getIt<FlutterSecureStorage>()),
+  );
 
   getIt.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(apiClient: getIt<ApiClient>()),
@@ -78,9 +86,10 @@ void _initAuth() {
 
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
+      userLocalDatasource: getIt<UserLocalDatasource>(),
       remoteDataSource: getIt<AuthRemoteDataSource>(),
       localDataSource: getIt<AuthLocalDataSource>(),
-      secureStorage: getIt<FlutterSecureStorage>(),
+      timeService: getIt<TimeService>(),
     ),
   );
 
@@ -90,7 +99,7 @@ void _initAuth() {
     () => CheckAuthStatusUseCase(getIt<AuthRepository>()),
   );
 
-  getIt.registerFactory<AuthBloc>(
+  getIt.registerLazySingleton<AuthBloc>(
     () => AuthBloc(
       loginUseCase: getIt<LoginUseCase>(),
       logoutUseCase: getIt<LogoutUseCase>(),
@@ -125,7 +134,7 @@ void _initProfile() {
     () => UpdateProfileUseCase(getIt<ProfileRepository>()),
   );
 
-  getIt.registerFactory<ProfileBloc>(
+  getIt.registerLazySingleton<ProfileBloc>(
     () => ProfileBloc(
       getProfileUseCase: getIt<GetProfileUseCase>(),
       updateProfileUseCase: getIt<UpdateProfileUseCase>(),

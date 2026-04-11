@@ -1,8 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../domain/repositories/auth_repository.dart';
+import '../../domain/usecases/check_auth_status_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
-import '../../domain/usecases/check_auth_status_usecase.dart';
-import '../../domain/repositories/auth_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -23,20 +24,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LogoutEvent>(_onLogout);
   }
 
+  // on change monitoring
+
   Future<void> _onCheckAuthStatus(
     CheckAuthStatusEvent event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
     try {
-      final isAuthenticated = await authRepository.isAuthenticated();
-      if (isAuthenticated) {
-        final user = await checkAuthStatusUseCase();
-        if (user != null) {
-          emit(AuthAuthenticated(user: user));
-        } else {
-          emit(AuthUnauthenticated());
-        }
+      final user = await checkAuthStatusUseCase();
+      if (user != null) {
+        emit(AuthAuthenticated(user: user));
       } else {
         emit(AuthUnauthenticated());
       }

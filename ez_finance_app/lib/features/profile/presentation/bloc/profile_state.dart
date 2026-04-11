@@ -29,6 +29,8 @@ class ProfileLoaded extends ProfileState {
   }
 }
 
+class ProfileNotFound extends ProfileState {}
+
 class ProfileError extends ProfileState {
   final String message;
 

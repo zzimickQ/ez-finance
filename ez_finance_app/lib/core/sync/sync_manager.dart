@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:ez_finance_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ez_finance_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:uuid/uuid.dart';
 
 import '../api/api_client.dart';
@@ -38,6 +40,7 @@ class SyncOperation {
 }
 
 class SyncManager {
+  final AuthBloc _authBloc;
   final AppDatabase _db;
   final ApiClient _apiClient;
   final NetworkInfo _networkInfo;
@@ -58,9 +61,11 @@ class SyncManager {
     required AppDatabase db,
     required ApiClient apiClient,
     required NetworkInfo networkInfo,
+    required AuthBloc authBloc,
   }) : _db = db,
        _apiClient = apiClient,
-       _networkInfo = networkInfo {
+       _networkInfo = networkInfo,
+       _authBloc = authBloc {
     _init();
   }
 
@@ -107,6 +112,7 @@ class SyncManager {
   }
 
   Future<void> syncAll() async {
+    if (_authBloc.state is! AuthAuthenticated) return;
     if (_isSyncing) return;
 
     final isConnected = await _networkInfo.isConnected;

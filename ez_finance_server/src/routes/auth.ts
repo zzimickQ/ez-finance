@@ -118,11 +118,13 @@ authRouter.get("/me", authMiddleware, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const profile = await ProfileModel.findById(req.userId);
+    const profile = await ProfileModel.findOne({ userId: req.userId });
 
     res.json({
       id: user._id,
       email: user.email,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
       profile: profile ? formatProfileResponse(profile) : null,
     });
   } catch (error) {

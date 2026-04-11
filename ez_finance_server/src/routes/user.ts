@@ -65,7 +65,7 @@ const updateHandler = async (req: AuthRequest, res: Response) => {
         lastName,
         phone,
       },
-      { new: true, upsert: true, setDefaultsOnInsert: true },
+      { upsert: true, returnDocument: "after" },
     );
 
     if (!profile) {

@@ -1,33 +1,39 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:ez_finance_app/core/utils/time_service.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_datasource.dart';
+import '../datasources/user_local_datasource.dart';
 import '../models/auth_response_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
-  final FlutterSecureStorage secureStorage;
+  final UserLocalDatasource userLocalDatasource;
+  final TimeService timeService;
 
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
-    required this.secureStorage,
+    required this.timeService,
+    required this.userLocalDatasource,
   });
 
   @override
   Future<User> login(String email, String password) async {
     final authResponse = await remoteDataSource.login(email, password);
 
-    await saveTokens(
+    await _saveTokens(
       accessToken: authResponse.accessToken ?? '',
       refreshToken: authResponse.refreshToken,
       sessionToken: authResponse.sessionToken,
     );
 
-    return _mapUserModelToEntity(authResponse.user!);
+    final user = _mapUserModelToEntity(authResponse.user!);
+    await userLocalDatasource.saveUser(user);
+    return user;
   }
 
   @override
@@ -37,7 +43,9 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       // Continue with local logout even if remote fails
     }
-    await clearTokens();
+
+    await localDataSource.clearTokens();
+    await userLocalDatasource.clearUser();
   }
 
   @override
@@ -52,11 +60,24 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<bool> isAuthenticated() async {
+    if (await localDataSource.hasTokens() == false) {
+      return Future.value(false);
+    }
+
+    final refreshToken = await localDataSource.getRefreshToken();
+    if (_isTokenExpired(refreshToken)) {
+      return Future.value(false);
+    }
     return await localDataSource.hasTokens();
   }
 
-  @override
-  Future<void> saveTokens({
+  bool _isTokenExpired(String? refreshToken) {
+    if (refreshToken == null) return true;
+    final expirationDate = JwtDecoder.getExpirationDate(refreshToken);
+    return expirationDate.isBefore(timeService.getCurrentTime());
+  }
+
+  Future<void> _saveTokens({
     required String accessToken,
     String? refreshToken,
     String? sessionToken,
@@ -68,11 +89,6 @@ class AuthRepositoryImpl implements AuthRepository {
     if (sessionToken != null) {
       await localDataSource.saveSessionToken(sessionToken);
     }
-  }
-
-  @override
-  Future<void> clearTokens() async {
-    await localDataSource.clearTokens();
   }
 
   User _mapUserModelToEntity(UserModel model) {

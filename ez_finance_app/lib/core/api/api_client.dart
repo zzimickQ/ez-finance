@@ -205,7 +205,7 @@ class _LoggingInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     print(
-      'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path} => DATA: ${response.data}',
+      'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',
     );
     handler.next(response);
   }

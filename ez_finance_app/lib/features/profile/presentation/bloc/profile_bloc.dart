@@ -37,10 +37,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         .listen(
           (profile) {
             if (profile != null) {
+              if (emit.isDone) return;
               emit(ProfileLoaded(profile: profile));
             }
           },
           onError: (error) {
+            if (emit.isDone) return;
             emit(ProfileError(message: error.toString()));
           },
         );
@@ -48,6 +50,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     final profile = await getProfileUseCase(event.userId);
     if (profile != null) {
       emit(ProfileLoaded(profile: profile));
+    } else {
+      emit(ProfileNotFound());
     }
   }
 

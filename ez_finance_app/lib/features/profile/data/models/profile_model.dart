@@ -24,13 +24,6 @@ class ProfileModel extends Equatable {
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
-    print(json['id']);
-    print(json['userId']);
-    print(json['firstName']);
-    print(json['lastName']);
-    print(json['phone']);
-    print(json['address']);
-    print(json['dateOfBirth']);
     return ProfileModel(
       id: json['id'] as String?,
       userId: json['userId'] as String?,

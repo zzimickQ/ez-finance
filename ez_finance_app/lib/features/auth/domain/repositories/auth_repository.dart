@@ -5,10 +5,4 @@ abstract class AuthRepository {
   Future<void> logout();
   Future<User?> getCurrentUser();
   Future<bool> isAuthenticated();
-  Future<void> saveTokens({
-    required String accessToken,
-    String? refreshToken,
-    String? sessionToken,
-  });
-  Future<void> clearTokens();
 }

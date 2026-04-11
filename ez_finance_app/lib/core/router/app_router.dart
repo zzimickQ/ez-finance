@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -7,42 +8,75 @@ import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/profile/presentation/bloc/profile_bloc.dart';
+import '../../features/profile/presentation/bloc/profile_state.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 
 class AppRouter {
   final AuthBloc authBloc;
+  final ProfileBloc profileBloc;
   final FlutterSecureStorage secureStorage;
 
-  AppRouter({required this.authBloc, required this.secureStorage});
+  AppRouter({
+    required this.authBloc,
+    required this.profileBloc,
+    required this.secureStorage,
+  });
 
   late final GoRouter router = GoRouter(
     initialLocation: RouteNames.welcome,
     debugLogDiagnostics: true,
-    refreshListenable: GoRouterRefreshStream(authBloc.stream),
+    refreshListenable: GoRouterRefreshStream([
+      authBloc.stream,
+      profileBloc.stream,
+    ]),
     redirect: (context, state) {
-      final isLoggedIn = authBloc.state is AuthAuthenticated;
-      final isLoggingIn =
+      final authState = authBloc.state;
+      final profileState = profileBloc.state;
+
+      final isLoggedIn = authState is AuthAuthenticated;
+      final isAuthChecking =
+          authState is AuthInitial || authState is AuthLoading;
+
+      final isOnAuthPage =
           state.matchedLocation == RouteNames.login ||
           state.matchedLocation == RouteNames.welcome;
       final isOnCreateProfile =
           state.matchedLocation == RouteNames.createProfile;
-      final isOnEditProfile = state.matchedLocation == RouteNames.editProfile;
 
-      if (!isLoggedIn && !isLoggingIn) {
-        return RouteNames.welcome;
+      // Auth status is still being resolved — wait on the welcome page
+      if (isAuthChecking) {
+        return isOnAuthPage ? null : RouteNames.welcome;
       }
 
-      if (isLoggedIn &&
-          (state.matchedLocation == RouteNames.login ||
-              state.matchedLocation == RouteNames.welcome)) {
-        return RouteNames.createProfile;
+      // Not logged in — must stay on auth pages
+      if (!isLoggedIn) {
+        return isOnAuthPage ? null : RouteNames.welcome;
       }
 
-      if (isLoggedIn &&
-          (isOnCreateProfile || isOnEditProfile) &&
-          state.matchedLocation == RouteNames.home) {
+      // ── Logged-in from here on ──────────────────────────────────────────
+
+      // User landed on welcome/login while already authenticated
+      if (isOnAuthPage) {
+        if (profileState is ProfileLoaded) return RouteNames.home;
+        if (profileState is ProfileNotFound || profileState is ProfileError) {
+          return RouteNames.createProfile;
+        }
+        // Profile is still loading (ProfileInitial / ProfileLoading) — wait
         return null;
+      }
+
+      // User is on the create-profile page
+      if (isOnCreateProfile) {
+        // Profile already exists — no need to set it up again
+        if (profileState is ProfileLoaded) return RouteNames.home;
+        return null;
+      }
+
+      // Navigating to any other page without a profile — force setup
+      if (profileState is ProfileNotFound) {
+        return RouteNames.createProfile;
       }
 
       return null;
@@ -81,16 +115,20 @@ class AppRouter {
 }
 
 class GoRouterRefreshStream extends ChangeNotifier {
-  GoRouterRefreshStream(Stream<dynamic> stream) {
+  GoRouterRefreshStream(List<Stream<dynamic>> streams) {
     notifyListeners();
-    _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
+    _subscriptions = streams
+        .map((stream) => stream.listen((state) => notifyListeners()))
+        .toList();
   }
 
-  late final dynamic _subscription;
+  late final List<StreamSubscription<dynamic>> _subscriptions;
 
   @override
   void dispose() {
-    _subscription.cancel();
+    for (final subscription in _subscriptions) {
+      subscription.cancel();
+    }
     super.dispose();
   }
 }

@@ -82,8 +82,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Map<String, dynamic> _entityToJson(Profile profile) {
     return {
       'id': profile.id,
-      'first_name': profile.firstName,
-      'last_name': profile.lastName,
+      'firstName': profile.firstName,
+      'lastName': profile.lastName,
       'phone': profile.phone,
       'address': profile.address,
       'dateOfBirth': profile.dateOfBirth?.toIso8601String(),
