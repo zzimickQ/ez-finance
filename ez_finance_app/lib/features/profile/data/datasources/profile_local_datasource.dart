@@ -5,7 +5,7 @@ import '../../domain/entities/profile.dart' as entity;
 
 abstract class ProfileLocalDataSource {
   Future<entity.Profile?> getProfile(String userId);
-  Stream<entity.Profile?> watchProfile(String userId);
+  Stream<entity.Profile> watchProfile(String userId);
   Future<entity.Profile> createProfile(entity.Profile profile);
   Future<entity.Profile> updateProfile(entity.Profile profile);
 }
@@ -23,9 +23,8 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
   }
 
   @override
-  Stream<entity.Profile?> watchProfile(String userId) {
+  Stream<entity.Profile> watchProfile(String userId) {
     return db.watchProfileByUserId(userId).map((profile) {
-      if (profile == null) return null;
       return _mapToEntity(profile);
     });
   }

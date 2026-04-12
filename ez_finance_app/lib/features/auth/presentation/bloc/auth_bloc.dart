@@ -25,6 +25,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   // on change monitoring
+  @override
+  void onChange(Change<AuthState> change) {
+    print(
+      'AuthBloc state changed: ${change.currentState} -> ${change.nextState}',
+    );
+    super.onChange(change);
+  }
 
   Future<void> _onCheckAuthStatus(
     CheckAuthStatusEvent event,

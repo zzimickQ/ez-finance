@@ -220,24 +220,23 @@ class SyncManager {
   }
 
   Future<void> _saveRemoteProfile(Map<String, dynamic> data) async {
-    await _db.insertProfile(
-      ProfilesCompanion(
-        id: Value(data['id']),
-        userId: Value(data['userId']),
-        firstName: Value(data['firstName']),
-        lastName: Value(data['lastName']),
-        phone: Value(data['phone']),
-        address: Value(data['address']),
-        dateOfBirth: Value(
-          data['dateOfBirth'] != null
-              ? DateTime.parse(data['dateOfBirth'])
-              : null,
-        ),
-        createdAt: Value(DateTime.now()),
-        updatedAt: Value(DateTime.now()),
-        isSynced: const Value(true),
+    var profilesCompanion = ProfilesCompanion(
+      id: Value(data['id']),
+      userId: Value(data['userId']),
+      firstName: Value(data['firstName']),
+      lastName: Value(data['lastName']),
+      phone: Value(data['phone']),
+      address: Value(data['address']),
+      dateOfBirth: Value(
+        data['dateOfBirth'] != null
+            ? DateTime.parse(data['dateOfBirth'])
+            : null,
       ),
+      createdAt: Value(DateTime.now()),
+      updatedAt: Value(DateTime.now()),
+      isSynced: const Value(true),
     );
+    await _db.insertProfile(profilesCompanion);
   }
 
   Future<void> _updatePendingCount() async {

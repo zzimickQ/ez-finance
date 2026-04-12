@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../domain/entities/profile.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../../domain/usecases/get_profile_usecase.dart';
@@ -12,8 +14,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final UpdateProfileUseCase updateProfileUseCase;
   final ProfileRepository profileRepository;
 
-  StreamSubscription<Profile?>? _profileSubscription;
-
   ProfileBloc({
     required this.getProfileUseCase,
     required this.updateProfileUseCase,
@@ -22,7 +22,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<LoadProfileEvent>(_onLoadProfile);
     on<UpdateProfileEvent>(_onUpdateProfile);
     on<CreateProfileEvent>(_onCreateProfile);
-    on<SyncProfileEvent>(_onSyncProfile);
   }
 
   Future<void> _onLoadProfile(
@@ -30,29 +29,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     Emitter<ProfileState> emit,
   ) async {
     emit(ProfileLoading());
-
-    await _profileSubscription?.cancel();
-    _profileSubscription = getProfileUseCase
-        .watch(event.userId)
-        .listen(
-          (profile) {
-            if (profile != null) {
-              if (emit.isDone) return;
-              emit(ProfileLoaded(profile: profile));
-            }
-          },
-          onError: (error) {
-            if (emit.isDone) return;
-            emit(ProfileError(message: error.toString()));
-          },
-        );
-
-    final profile = await getProfileUseCase(event.userId);
-    if (profile != null) {
-      emit(ProfileLoaded(profile: profile));
-    } else {
-      emit(ProfileNotFound());
-    }
+    final profileStream = getProfileUseCase(event.userId);
+    return await emit.forEach<Profile>(
+      profileStream,
+      onData: (profile) {
+        return ProfileLoaded(profile: profile);
+      },
+      onError: (error, stackTrace) {
+        return ProfileError(message: error.toString());
+      },
+    );
   }
 
   Future<void> _onUpdateProfile(
@@ -83,24 +69,5 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     } catch (e) {
       emit(ProfileError(message: e.toString()));
     }
-  }
-
-  Future<void> _onSyncProfile(
-    SyncProfileEvent event,
-    Emitter<ProfileState> emit,
-  ) async {
-    try {
-      emit(ProfileLoaded(profile: event.profile, isSyncing: true));
-      await profileRepository.syncProfile(event.profile);
-      emit(ProfileLoaded(profile: event.profile, isSyncing: false));
-    } catch (e) {
-      emit(ProfileLoaded(profile: event.profile, isSyncing: false));
-    }
-  }
-
-  @override
-  Future<void> close() {
-    _profileSubscription?.cancel();
-    return super.close();
   }
 }

@@ -1,17 +1,20 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'route_names.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
-import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/splash_screen.dart';
+import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/profile/presentation/bloc/profile_state.dart';
-import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
+import 'route_names.dart';
 
 class AppRouter {
   final AuthBloc authBloc;
@@ -25,7 +28,7 @@ class AppRouter {
   });
 
   late final GoRouter router = GoRouter(
-    initialLocation: RouteNames.welcome,
+    initialLocation: RouteNames.splash,
     debugLogDiagnostics: true,
     refreshListenable: GoRouterRefreshStream([
       authBloc.stream,
@@ -40,14 +43,16 @@ class AppRouter {
           authState is AuthInitial || authState is AuthLoading;
 
       final isOnAuthPage =
+          state.matchedLocation == RouteNames.splash ||
           state.matchedLocation == RouteNames.login ||
           state.matchedLocation == RouteNames.welcome;
+
       final isOnCreateProfile =
           state.matchedLocation == RouteNames.createProfile;
 
       // Auth status is still being resolved — wait on the welcome page
       if (isAuthChecking) {
-        return isOnAuthPage ? null : RouteNames.welcome;
+        return isOnAuthPage ? null : RouteNames.splash;
       }
 
       // Not logged in — must stay on auth pages
@@ -82,6 +87,10 @@ class AppRouter {
       return null;
     },
     routes: [
+      GoRoute(
+        path: RouteNames.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: RouteNames.welcome,
         builder: (context, state) => const WelcomePage(),

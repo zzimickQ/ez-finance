@@ -44,6 +44,7 @@ dependencies:
   uuid: ^4.5.3
   equatable: ^2.0.8
   jwt_decoder: ^2.0.1
+  rxdart: ^0.28.0
 
 dev_dependencies:
   flutter_test:

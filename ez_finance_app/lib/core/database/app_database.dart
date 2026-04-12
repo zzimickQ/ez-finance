@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import 'tables/profiles_table.dart';
@@ -16,7 +17,11 @@ class AppDatabase extends _$AppDatabase {
   int get schemaVersion => 1;
 
   static QueryExecutor _openConnection() {
-    return driftDatabase(name: 'ez_finance_db');
+    final dbname = 'ez_finance_db';
+    getApplicationDocumentsDirectory().then(
+      (dir) => print("DB directory: ${dir.path}/$dbname.sqlite"),
+    );
+    return driftDatabase(name: dbname);
   }
 
   Future<List<User>> getAllUsers() => select(users).get();
@@ -47,10 +52,10 @@ class AppDatabase extends _$AppDatabase {
         (result) => result.firstOrNull,
       );
 
-  Stream<Profile?> watchProfileByUserId(String userId) =>
+  Stream<Profile> watchProfileByUserId(String userId) =>
       (select(profiles)
             ..where((p) => p.userId.equals(userId) & p.isDeleted.equals(false)))
-          .watchSingleOrNull();
+          .watchSingle();
 
   Future<Profile?> insertProfile(ProfilesCompanion profile) =>
       into(profiles).insertReturning(profile, mode: InsertMode.insertOrReplace);
